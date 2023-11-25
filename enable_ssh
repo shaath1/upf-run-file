@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# Set the path to the SSH daemon configuration file
+SSH_CONFIG_FILE="/etc/ssh/sshd_config"
+
+# Check if the configuration file exists
+if [ -f "$SSH_CONFIG_FILE" ]; then
+    # Backup the original configuration file
+    cp "$SSH_CONFIG_FILE" "$SSH_CONFIG_FILE.bak"
+
+    # Update the PasswordAuthentication directive
+    sed -i 's/^#*PasswordAuthentication.*/PasswordAuthentication yes/' "$SSH_CONFIG_FILE"
+
+    # Restart the SSH service
+    systemctl restart ssh
+
+    echo "Password authentication is now enabled in SSH."
+else
+    echo "Error: SSH daemon configuration file not found at $SSH_CONFIG_FILE."
+fi
+
+echo " make chmod +x enable_password_auth.sh"
+echo "then run the script"
