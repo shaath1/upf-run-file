@@ -19,5 +19,4 @@ else
     echo "Error: SSH daemon configuration file not found at $SSH_CONFIG_FILE."
 fi
 
-echo " make chmod +x enable_password_auth.sh"
-echo "then run the script"
+
