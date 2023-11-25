@@ -13,18 +13,6 @@ function terminate()
 {
     rm run.pid
     echo "Receive SIGINT, terminating..."
-    if [ $N3IWF_ENABLE -ne 0 ]; then
-        sudo ip xfrm state > ${LOG_PATH}NWu_SA_state.log
-        sudo ip xfrm state flush
-        sudo ip xfrm policy flush
-        sudo ip link del ipsec0
-        XFRMI_LIST=($(ip link | grep xfrmi | awk -F'[:,@]' '{print $2}'))
-        for XFRMI_IF in "${XFRMI_LIST[@]}"
-        do
-            sudo ip link del $XFRMI_IF
-        done
-    fi
-    
     for ((i=${#PID_LIST[@]}-1;i>=0;i--)); do
         sudo kill -SIGTERM ${PID_LIST[i]}
     done
