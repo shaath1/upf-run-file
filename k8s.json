@@ -1,0 +1,52 @@
+{
+  "metadata": {
+    "name": "k8s-as-tc",
+    "namespace": "system",
+    "labels": {},
+    "annotations": {},
+    "disable": false
+  },
+  "spec": {
+    "local_access_config": {
+      "local_domain": "as-tc.local",
+      "default_port": {}
+    },
+    "global_access_enable": {},
+    "use_default_psp": {},
+    "use_custom_cluster_role_list": {
+      "cluster_roles": [
+        {
+          "tenant": "ves-io",
+          "namespace": "shared",
+          "name": "ves-io-admin-cluster-role",
+          "kind": "k8s_cluster_role"
+        }
+      ]
+    },
+    "use_custom_cluster_role_bindings": {
+      "cluster_role_bindings": [
+        {
+          "tenant": "f5-emea-sp-dgidcptq",
+          "namespace": "system",
+          "name": "ves-io-admin-cluster-role-binding",
+          "kind": "k8s_cluster_role_binding"
+        }
+      ]
+    },
+    "cluster_wide_app_list": {
+      "cluster_wide_apps": [
+        {
+          "dashboard": {}
+        },
+        {
+          "metrics_server": {}
+        },
+        {
+          "prometheus": {}
+        }
+      ]
+    },
+    "no_insecure_registries": {},
+    "cluster_scoped_access_deny": {}
+  }
+}
