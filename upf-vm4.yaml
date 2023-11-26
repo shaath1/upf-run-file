@@ -101,4 +101,4 @@ spec:
   source:
     http:
       #url: http://10.176.10.122/focal-server-cloudimg-amd64.img
-      url: http://10.1.1.7/jammy-server-cloudimg-amd64.img
+      #url: http://10.1.1.7/jammy-server-cloudimg-amd64.img
