@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "name": "cec-ac",
+    "disable": false
+  },
+  "spec": {
+    "volterra_certified_hw": "vmware-voltstack-combo",
+    "master_node_configuration": [
+      {
+        "name": "node-0"
+      }
+    ],
+    "worker_nodes": [],
+    "no_bond_devices": {},
+    "default_network_config": {},
+    "default_storage_config": {},
+    "disable_gpu": {},
+    "coordinates": {
+      "latitude": 41.9,
+      "longitude": 12.49
+    },
+    "k8s_cluster": {
+      "tenant": "f5-emea-sp-dgidcptq",
+      "namespace": "system",
+      "name": "k8s-cec-ac",
+      "kind": "k8s_cluster"
+    },
+    "logs_streaming_disabled": {},
+    "deny_all_usb": {},
+    "enable_vm": {},
+    "default_blocked_services": {},
+    "sw": {
+      "volterra_software_version": "crt-20231017-2542"
+    },
+    "os": {
+      "operating_system_version": "7.2009.27"
+    },
+    "offline_survivability_mode": {
+      "no_offline_survivability_mode": {}
+    },
+    "default_sriov_interface": {}
+  }
+}
