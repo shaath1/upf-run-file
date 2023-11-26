@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "name": "cec-ac",
+    "name": "as-tc",
     "disable": false
   },
   "spec": {
@@ -22,7 +22,7 @@
     "k8s_cluster": {
       "tenant": "f5-emea-sp-dgidcptq",
       "namespace": "system",
-      "name": "k8s-cec-ac",
+      "name": "k8s-as-tc",
       "kind": "k8s_cluster"
     },
     "logs_streaming_disabled": {},
