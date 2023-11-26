@@ -1,0 +1,104 @@
+# Version 2, add netattach
+#
+apiVersion: v1
+kind: Service
+metadata:
+  name: upf-service
+spec:
+  ports:
+  - port: 22
+    name: ssh
+    protocol: TCP
+    targetPort: 22
+  - port: 80
+    name: http
+    protocol: TCP
+    targetPort: 80
+  - port: 8805
+    name: upf
+    protocol: UDP
+    targetPort: 8805 
+  selector:
+    vmi: upf-vm4
+
+---
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  name: upf-vm4
+spec:
+  running: true
+  template:
+    metadata:
+      labels:
+        kubevirt.io/domain: upf-vm4
+        vmi: upf-vm4
+    spec:
+      domain:
+        cpu:
+          sockets: 1
+          cores: 2
+        resources:
+          requests:
+            memory: 2Gi
+          limits:
+            memory: 2Gi
+        devices:
+          disks:
+            - name: datavolumedisk1
+              disk:
+                bus: virtio
+          interfaces:
+            - name: default
+              bridge: {}
+            - name: multus-n3
+              bridge: {}
+#             - name: multus-n4
+#               bridge: {}:
+            - name: multus-n6
+              bridge: {}
+      networks:
+        - name: default
+          pod: {}
+        - multus:
+            networkName: upf-n3
+          name: multus-n3
+#         - multus:
+#             networkName: upf-n4
+#           name: multus-n4
+        - multus:
+            networkName: upf-n6
+          name: multus-n6
+      volumes:
+        - name: datavolumedisk1
+          dataVolume:
+            name: ubuntu-dv5-dv
+        - name: cloudinitdisk
+          cloudInitNoCloud:
+            userData: |-
+             #cloud-config
+             password: ubuntu
+             chpasswd: { expire: False }
+             ssh_authorized_keys:
+             - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC8w6XIlwkNCMQgYy2xxRII7mHGYdpBfA/AqidcbKNv74NOMsyoXGF6TcJytCYd3XX+g5HvYFqXiK94YjrlIGMixfc12IEkX1ANMyF/B4UNHGMNCoCWF7qcjDLESk3aVDP5HtDpuxfKHkYtm68VERlluTLqnwaDUcniaZ//p7UjN3lVoKKUoShBuiDoG2YZkfnDTCohHN2ZNPsydg+NBdg6lM5GhgQfKDDKqOzD/CjhPQeKoiOJFm1ObnjbDAXA0yYfVR8W0fxxXel6Pe70TrcoUxZKzYZG8vsy2zEZc7vdRhlzLlIIN9TvjR3EwmB3GlevGfh726WAj3bV/fuPpQof a.cheng@f5.com
+             package_update: false
+             package_upgrade: false
+             packages:
+             runcmd:
+             - [ systemctl, start, qemu-guest-agent ]
+---
+apiVersion: cdi.kubevirt.io/v1alpha1
+kind: DataVolume
+metadata:
+  name: ubuntu-dv5-dv
+spec:
+  pvc:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 12Gi
+  source:
+    http:
+      #url: http://10.176.10.122/focal-server-cloudimg-amd64.img
+      url: http://10.1.1.7/jammy-server-cloudimg-amd64.img
