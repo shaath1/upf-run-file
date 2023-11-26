@@ -4,7 +4,7 @@
     "disable": false
   },
   "spec": {
-    "volterra_certified_hw": "vmware-voltstack-combo",
+    "volterra_certified_hw": "kvm-voltstack-combo",
     "master_node_configuration": [
       {
         "name": "node-0"
