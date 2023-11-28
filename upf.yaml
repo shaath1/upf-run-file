@@ -111,7 +111,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: upf #make sure smf point to right service name in their configmap file
+  name: upf-service #make sure smf point to right service name in their configmap file
 spec:
   ports:
   - port: 22
@@ -123,7 +123,7 @@ spec:
     protocol: TCP
     targetPort: 80
   - port: 8805
-    name: upf-service
+    name: upf
     protocol: UDP
     targetPort: 8805
   selector:
