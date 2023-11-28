@@ -30,15 +30,20 @@ spec:
           interfaces:
           - name: default
             masquerade: {}
-          - name: multus-eth1 
+          - name: multus-n3 
             bridge: {}
+          - name: multus-n6
+            bridge: {}            
       terminationGracePeriodSeconds: 0
       networks:
       - name: default
         pod: {}
       - multus:
-          networkName: n3-telco
-        name: multus-eth1
+          networkName: upf-n3
+        name: multus-n3 
+      - multus:
+          networkName: upf-n6
+        name: multus-n6
       volumes:
       - name: bootdisk
         containerDisk:
