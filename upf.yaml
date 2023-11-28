@@ -1,0 +1,125 @@
+apiVersion: kubevirt.io/v1alpha3
+kind: VirtualMachine
+metadata:
+  name: upf
+spec:
+  running: true
+  template:
+    metadata:
+      labels:
+        kubevirt.io/name: f5xc-vm
+        vmi: upf
+    spec:
+      domain:
+        cpu:
+          sockets: 1
+          cores: 2 
+        memory:
+          guest: "2G"
+        devices:
+          autoattachPodInterface: true # true by default, explicitly setting for clarity
+          disks:
+          - name: bootdisk
+            disk:
+              bus: virtio
+          - name: cloud-init
+            disk:
+              bus: virtio
+          - name: upf-cfg
+            serial: upfconfigmap
+          interfaces:
+          - name: default
+            masquerade: {}
+          - name: multus-eth1 
+            bridge: {}
+      terminationGracePeriodSeconds: 0
+      networks:
+      - name: default
+        pod: {}
+      - multus:
+          networkName: n3-telco
+        name: multus-eth1
+      volumes:
+      - name: bootdisk
+        containerDisk:
+          image: mcas/kubevirt-ubuntu-20.04:latest
+      - name: cloud-init      
+        cloudInitNoCloud:
+          userData: |-
+            #cloud-config
+            users:
+              - name: root
+                ssh-authorized-keys:
+                  # provide ssh public key
+            ssh_pwauth: true
+            password: *****
+            chpasswd:
+              expire: False
+              list: |-
+                 root:ubuntu
+            bootcmd:
+              # Mount the ConfigMap
+              - "sudo mkdir /tmp/upfcfg"
+              - "sudo mount /dev/disk/by-id/ata-QEMU_HARDDISK_upfconfigmap /tmp/upfcfg"
+            package_update: true
+            packages:
+              - git
+              - gcc
+              - g++
+              - cmake
+              - autoconf
+              - libtool
+              - pkg-config
+              - libmnl-dev
+              - libyaml-dev
+            snap:
+              commands:
+                00: snap install go --classic --channel=1.18/stable
+            runcmd:
+              - sysctl -w net.ipv4.ip_forward=1 ; iptables -t nat -A POSTROUTING -o enp1s0 -j MASQUERADE ; iptables -A FORWARD -p tcp -m tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1400 ; systemctl stop ufw
+              - cd /opt ; git clone -b v0.8.2 https://github.com/free5gc/gtp5g.git ; cd gtp5g ; make ; make install
+              - cd /opt ; git clone --recursive -b v3.3.0 -j `nproc` https://github.com/free5gc/free5gc.git ; cd free5gc ; su root -c 'make upf'
+              - cp /tmp/upfcfg/upfcfg.yaml /etc/upfcfg.yaml
+              - a=$(ip addr show dev enp1s0 | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/') ; sed -i "s/tobereplaced/$a/" /etc/upfcfg.yaml
+              - /opt/free5gc/bin/upf -c /etc/upfcfg.yaml &
+          networkData: |
+            network:
+              version: 1
+              config:
+              - type: physical
+                name: enp1s0
+                subnets:
+                  - type: dhcp
+              - type: physical
+                name: enp2s0
+                subnets:
+                  - type: dhcp
+              - type: physical
+                name: enp3s0
+                subnets:
+                  - type: dhcp
+                    
+      - name: upf-cfg
+        configMap:
+          name: upf-configmap
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: upf #make sure smf point to right service name in their configmap file
+spec:
+  ports:
+  - port: 22
+    name: ssh
+    protocol: TCP
+    targetPort: 22
+  - port: 80
+    name: http
+    protocol: TCP
+    targetPort: 80
+  - port: 8805
+    name: upf-service
+    protocol: UDP
+    targetPort: 8805
+  selector:
+    vmi: upf
