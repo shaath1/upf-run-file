@@ -50,18 +50,17 @@ spec:
           image: mcas/kubevirt-ubuntu-20.04:latest
       - name: cloud-init      
         cloudInitNoCloud:
-          userData: |-
-            #cloud-config
-            users:
-              - name: root
-                ssh-authorized-keys:
-                  # provide ssh public key
-            ssh_pwauth: true
-            password: *****
-            chpasswd:
-              expire: False
-              list: |-
-                 root:ubuntu
+            userData: |-
+             #cloud-config
+             password: ubuntu
+             chpasswd: { expire: False }
+             ssh_authorized_keys:
+             - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC8w6XIlwkNCMQgYy2xxRII7mHGYdpBfA/AqidcbKNv74NOMsyoXGF6TcJytCYd3XX+g5HvYFqXiK94YjrlIGMixfc12IEkX1ANMyF/B4UNHGMNCoCWF7qcjDLESk3aVDP5HtDpuxfKHkYtm68VERlluTLqnwaDUcniaZ//p7UjN3lVoKKUoShBuiDoG2YZkfnDTCohHN2ZNPsydg+NBdg6lM5GhgQfKDDKqOzD/CjhPQeKoiOJFm1ObnjbDAXA0yYfVR8W0fxxXel6Pe70TrcoUxZKzYZG8vsy2zEZc7vdRhlzLlIIN9TvjR3EwmB3GlevGfh726WAj3bV/fuPpQof a.cheng@f5.com
+             package_update: false
+             package_upgrade: false
+             packages:
+             runcmd:
+             - [ systemctl, start, qemu-guest-agent ]  
             bootcmd:
               # Mount the ConfigMap
               - "sudo mkdir /tmp/upfcfg"
@@ -84,8 +83,10 @@ spec:
               - sysctl -w net.ipv4.ip_forward=1 ; iptables -t nat -A POSTROUTING -o enp1s0 -j MASQUERADE ; iptables -A FORWARD -p tcp -m tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1400 ; systemctl stop ufw
               - cd /opt ; git clone -b v0.8.2 https://github.com/free5gc/gtp5g.git ; cd gtp5g ; make ; make install
               - cd /opt ; git clone --recursive -b v3.3.0 -j `nproc` https://github.com/free5gc/free5gc.git ; cd free5gc ; su root -c 'make upf'
-              - cp /tmp/upfcfg/upfcfg.yaml /etc/upfcfg.yaml
-              - a=$(ip addr show dev enp1s0 | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/') ; sed -i "s/tobereplaced/$a/" /etc/upfcfg.yaml
+              - sudo cd /etc
+              - sudo curl -O https://raw.githubusercontent.com/shaath1/upf-run-file/main/upf.yaml
+              - sudo curl -O https://raw.githubusercontent.com/shaath1/upf-run-file/main/modify_upfcfg.sh
+              - sudo ./modify_upfcfg.sh
               - /opt/free5gc/bin/upf -c /etc/upfcfg.yaml &
           networkData: |
             network:
