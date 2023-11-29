@@ -29,16 +29,21 @@ spec:
             serial: upfconfigmap
           interfaces:
           - name: default
-            masquerade: {}
-          - name: multus-eth1 
             bridge: {}
+          - name: multus-n3
+            bridge: {}
+          - name: multus-n6
+            bridge: {}            
       terminationGracePeriodSeconds: 0
       networks:
       - name: default
         pod: {}
       - multus:
-          networkName: n3-telco
-        name: multus-eth1
+          networkName: upf-n3
+        name: multus-n3
+      - multus:        
+          networkName: upf-n6
+        name: multus-n6        
       volumes:
       - name: bootdisk
         containerDisk:
@@ -47,16 +52,10 @@ spec:
         cloudInitNoCloud:
           userData: |-
             #cloud-config
-            users:
-              - name: root
-                ssh-authorized-keys:
-                  # provide ssh public key
-            ssh_pwauth: true
-            password: *****
-            chpasswd:
-              expire: False
-              list: |-
-                 root:ubuntu
+            password: ubuntu
+            chpasswd: { expire: False }
+            ssh_authorized_keys:
+            - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC8w6XIlwkNCMQgYy2xxRII7mHGYdpBfA/AqidcbKNv74NOMsyoXGF6TcJytCYd3XX+g5HvYFqXiK94YjrlIGMixfc12IEkX1ANMyF/B4UNHGMNCoCWF7qcjDLESk3aVDP5HtDpuxfKHkYtm68VERlluTLqnwaDUcniaZ//p7UjN3lVoKKUoShBuiDoG2YZkfnDTCohHN2ZNPsydg+NBdg6lM5GhgQfKDDKqOzD/CjhPQeKoiOJFm1ObnjbDAXA0yYfVR8W0fxxXel6Pe70TrcoUxZKzYZG8vsy2zEZc7vdRhlzLlIIN9TvjR3EwmB3GlevGfh726WAj3bV/fuPpQof a.cheng@f5.com            
             bootcmd:
               # Mount the ConfigMap
               - "sudo mkdir /tmp/upfcfg"
@@ -93,8 +92,11 @@ spec:
               - type: physical
                 name: enp2s0
                 subnets:
-                  - type: static
-                    address: 10.1.30.7/24
+                  - type: dhcp 
+              - type: physical
+                name: enp3s0
+                subnets:
+                  - type: dhcp                  
       - name: upf-cfg
         configMap:
           name: upf-configmap
@@ -102,7 +104,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: upf #make sure smf point to right service name in their configmap file
+  name: upf-service #make sure smf point to right service name in their configmap file
 spec:
   ports:
   - port: 22
@@ -119,4 +121,3 @@ spec:
     targetPort: 8805
   selector:
     vmi: upf
-
