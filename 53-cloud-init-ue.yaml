@@ -1,0 +1,15 @@
+# This file is overwritten by UDF userdata on startup, please store your network configs separately
+network:
+    version: 2
+    ethernets:
+        ens5:
+            dhcp4: true
+        ens6:
+          addresses:
+             - 10.1.110.169/24     
+        ens7: 
+          addresses:
+             - 10.1.120.169/24    
+        ens8: 
+          addresses:
+             - 10.1.130.169/24
