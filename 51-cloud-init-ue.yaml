@@ -6,10 +6,7 @@ network:
             dhcp4: true
         ens6:
           addresses:
-             - 10.1.110.167/24     
+             - 10.1.120.167/24     
         ens7: 
           addresses:
-             - 10.1.120.167/24    
-        ens8: 
-          addresses:
-             - 10.1.130.167/24
+             - 10.1.130.167/24    
